@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>SRPD</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="/styles/style.css" >
+    </head>
+    <body>
+        <header>
+            <center><h1>Online Platform For Search And Report Missing People</h1></center>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="report.html">Report</a></li>
+                    <li><a href="search.html">Search</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <center><h2>Report About Missing Person</h2></center>
+            <form action="submit-report.html" method="POST" enctype="multipart/form-data">
+
+                <label for="fullName">
+                    Full Name of Missing Person<br>
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter Full Name" required><br>
+                </label>
+
+                <label for="birthdate">
+                    Birthdate<br>
+                    <input type="date" id="birthdate" name="birthdate" required><br>
+                </label>
+
+                <label>Gender<br>
+                    <input type="radio" id="male" name="gender" value="Male" required> Male
+                    <input type="radio" id="female" name="gender" value="Female" required> Female<br>
+                </label>
+
+                <label for="missingDate">
+                    Missing Date<br>
+                    <input type="date" id="missingDate" name="missingDate" required><br>
+                </label>
+
+                <label for="bloodGroup">
+                    Blood Group<br>
+                    <input type="text" id="bloodGroup" name="bloodGroup" placeholder="Enter Blood Group" required><br>
+                </label>
+
+                <label for="image">
+                    Image of Missing Person<br>
+                    <input type="file" id="image" name="image" accept="image/*" required><br>
+                </label>
+
+                <label for="otherDetails">
+                    Other Details<br>
+                    <textarea id="otherDetails" name="otherDetails" placeholder="Provide additional details" rows="4" cols="50"></textarea><br>
+                </label>
+
+                <label for="reporterFullName">
+                    Full Name of Reporter<br>
+                    <input type="text" id="reporterFullName" name="reporterFullName" placeholder="Enter Your Full Name" required><br>
+                </label>
+
+                <label for="phoneNumber">
+                    Phone Number<br>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter Your Phone Number" required><br>
+                </label>
+
+                <label for="idNumber">
+                    ID Number (Optional)<br>
+                    <input type="text" id="idNumber" name="idNumber" placeholder="Enter Your ID Number"><br>
+                </label>
+
+                <button type="submit">Submit Report</button>
+            </form>
+        </main>
+
+        <footer>
+            <center>All Rights Reserved By SDG Dev Team.</center>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Missing Person Report System</title>
+    <link rel="stylesheet" href="{%'styles/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Login</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'report' %}">Report</a></li>
+                <li><a href="{% url 'search' %}">Search</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <form method="POST">
+            {% csrf_token %}
+            <h2>Login to Your Account</h2>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter Username" required><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter Password" required><br>
+
+            <button type="submit">Login</button>
+        </form>
+
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 All Rights Reserved | SDG Dev Team</p>
+    </footer>
+
+    <script src="{% static 'scripts/script.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!-- templates/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Missing People Platform</title>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    <header>
+        <center><h1>Dashboard - Manage Missing People Reports</h1></center>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/report/">Report</a></li>
+                <li><a href="/search/">Search</a></li>
+                <li><a href="/logout/">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <center><h2>All Missing Person Reports</h2></center>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Missing Date</th>
+                    <th>Accept</th>
+                    <th>Reject</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                    <tr>
+                        <td>{{ report.full_name }}</td>
+                        <td>{{ report.missing_date }}</td>
+                        <td>
+                            {% if not report.is_accepted %}
+                                <a href="{% url 'accept_reject_report' report.id 'accept' %}">Accept</a>
+                            {% else %}
+                                Accepted
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not report.is_accepted %}
+                                <a href="{% url 'accept_reject_report' report.id 'reject' %}">Reject</a>
+                            {% else %}
+                                Rejected
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No reports available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+    <footer>
+        <center>All Rights Reserved By SDG Dev Team.</center>
+    </footer>
+</body>
+</html>
