@@ -1,67 +1,222 @@
-<!-- templates/dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Missing People Platform</title>
-    <link rel="stylesheet" href="/styles/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRPD - Security Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .dashboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .dashboard-table th, .dashboard-table td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        .dashboard-table th { background-color: #003366; color: white; font-size: 16px; }
+        .dashboard-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .dashboard-table tr.match-found { background-color: #e6ffe6; }
+        .action-buttons button { margin-right: 10px; padding: 5px 15px; font-size: 14px; border: none; border-radius: 4px; cursor: pointer; }
+        .accepted { background-color: #28a745; color: white; }
+        .rejected { background-color: #dc3545; color: white; }
+        .stats-box { display: flex; justify-content: space-between; background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .stats-box p { margin: 0; padding: 10px; border-radius: 3px; }
+        .stats-box p.accepted { background-color: #28a745; color: white; }
+        .stats-box p.rejected { background-color: #dc3545; color: white; }
+        .stats-box p.pending { background-color: #ffc107; color: black; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); }
+        .modal-content { background-color: white; margin: 15% auto; padding: 20px; width: 80%; max-width: 500px; border-radius: 5px; }
+        .notification { cursor: pointer; }
+    </style>
 </head>
 <body>
     <header>
-        <center><h1>Dashboard - Manage Missing People Reports</h1></center>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/report/">Report</a></li>
-                <li><a href="/search/">Search</a></li>
-                <li><a href="/logout/">Logout</a></li>
-            </ul>
-        </nav>
+        <h1>Security Dashboard - Missing Person Reports</h1>
     </header>
 
     <main>
-        <center><h2>All Missing Person Reports</h2></center>
-
-        <table>
+        <h2>Manage Reports</h2>
+        <div style="margin-bottom: 20px;">
+            <input type="text" id="searchInput" placeholder="Search by name..." onkeyup="filterReports()">
+            <select id="statusFilter" onchange="filterReports()">
+                <option value="">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Match Found">Match Found</option>
+            </select>
+        </div>
+        <div class="stats-box">
+            <p>Total Reports: <span id="totalReports">{{ reports|length }}</span></p>
+            <p class="accepted">Accepted: <span id="acceptedCount">{{ reports|selectattr('status', 'equalto', 'Accepted')|list|length }}</span></p>
+            <p class="rejected">Rejected: <span id="rejectedCount">{{ reports|selectattr('status', 'equalto', 'Rejected')|list|length }}</span></p>
+            <p class="pending">Pending: <span id="pendingCount">{{ reports|selectattr('status', 'in', [None, 'Pending'])|list|length }}</span></p>
+            <p style="background-color: #17a2b8; color: white;">Statements: <span id="matchCount">{{ reports|selectattr('statement_id', 'defined')|list|length }}</span></p>
+        </div>
+        <table class="dashboard-table">
             <thead>
                 <tr>
                     <th>Full Name</th>
+                    <th>Age</th>
                     <th>Missing Date</th>
-                    <th>Accept</th>
-                    <th>Reject</th>
+                    <th>Province</th>
+                    <th>Blood Group</th>
+                    <th>Status</th>
+                    <th>Statement</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="reportsTable">
                 {% for report in reports %}
-                    <tr>
-                        <td>{{ report.full_name }}</td>
-                        <td>{{ report.missing_date }}</td>
-                        <td>
-                            {% if not report.is_accepted %}
-                                <a href="{% url 'accept_reject_report' report.id 'accept' %}">Accept</a>
-                            {% else %}
-                                Accepted
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if not report.is_accepted %}
-                                <a href="{% url 'accept_reject_report' report.id 'reject' %}">Reject</a>
-                            {% else %}
-                                Rejected
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4">No reports available.</td>
-                    </tr>
+                <tr {% if report.statement_id %}class="match-found"{% endif %}>
+                    <td>{{ report.full_name }}</td>
+                    <td>{{ report.age }}</td>
+                    <td>{{ report.missing_date }}</td>
+                    <td>{{ report.wilaya }}</td>
+                    <td>{{ report.blood_group }}</td>
+                    <td>{{ report.status or 'Pending' }}</td>
+                    <td>
+                        {% if report.statement_id %}
+                            <i class="fas fa-bell notification" style="color: #28a745;" 
+                               title="Statement submitted on {{ report.statement_created_at or 'Unknown' }}" 
+                               onclick="viewStatement({{ report.statement_id }})"></i>
+                            <span style="margin-left: 5px; font-size: 12px;">
+                                ({{ report.statement_created_at[:10] if report.statement_created_at else 'Unknown' }})
+                            </span>
+                        {% else %}
+                            <span>-</span>
+                        {% endif %}
+                    </td>
+                    <td class="action-buttons">
+                        <button onclick="viewDetails({{ report.id }})"><i class="fas fa-eye"></i> View</button>
+                        <button onclick="window.location.href='{{ url_for('update_status', report_id=report.id, status='Accepted') }}'" class="accepted"><i class="fas fa-check"></i> Accept</button>
+                        <button onclick="window.location.href='{{ url_for('update_status', report_id=report.id, status='Rejected') }}'" class="rejected"><i class="fas fa-times"></i> Reject</button>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Report Details Modal -->
+        <div id="detailsModal" class="modal">
+            <div class="modal-content">
+                <h3>Report Details</h3>
+                <div id="modalDetails"></div>
+                <button onclick="closeModal('detailsModal')">Close</button>
+            </div>
+        </div>
+
+        <!-- Statement Details Modal -->
+        <div id="statementModal" class="modal">
+            <div class="modal-content">
+                <h3>Statement Details</h3>
+                <div id="statementDetails"></div>
+                <button onclick="closeModal('statementModal')">Close</button>
+            </div>
+        </div>
     </main>
 
     <footer>
-        <center>All Rights Reserved By SDG Dev Team.</center>
+        <p>© 2025 All Rights Reserved | Mihoubi Youcef</p>
     </footer>
+
+    <script>
+        function filterReports() {
+            const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+            const statusFilter = document.getElementById("statusFilter").value;
+            const rows = document.querySelectorAll("#reportsTable tr");
+
+            let total = 0, accepted = 0, rejected = 0, pending = 0, matches = 0;
+
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const status = row.cells[5].textContent;
+                const hasMatch = row.cells[6].querySelector(".notification") !== null;
+
+                let matchesSearch = name.includes(searchTerm);
+                let matchesStatus = true;
+
+                if (statusFilter === "Match Found") {
+                    matchesStatus = hasMatch;
+                } else if (statusFilter) {
+                    matchesStatus = status === statusFilter;
+                }
+
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = "";
+                    total++;
+                    if (status === "Accepted") accepted++;
+                    else if (status === "Rejected") rejected++;
+                    else pending++;
+                    if (hasMatch) matches++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            document.getElementById("totalReports").textContent = total;
+            document.getElementById("acceptedCount").textContent = accepted;
+            document.getElementById("rejectedCount").textContent = rejected;
+            document.getElementById("pendingCount").textContent = pending;
+            document.getElementById("matchCount").textContent = matches;
+        }
+
+        function viewDetails(reportId) {
+            fetch(`/report_details/${reportId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("modalDetails").innerHTML = `
+                        <p><strong>Name:</strong> ${data.full_name}</p>
+                        <p><strong>Age:</strong> ${new Date().getFullYear() - new Date(data.birthdate).getFullYear()}</p>
+                        <p><strong>Missing Date:</strong> ${data.missing_date}</p>
+                        <p><strong>Province:</strong> ${data.wilaya}</p>
+                        <p><strong>Blood Group:</strong> ${data.blood_group}</p>
+                        <p><strong>Other Details:</strong> ${data.other_details || "N/A"}</p>
+                        <p><strong>Reporter:</strong> ${data.reporter_full_name}</p>
+                        <p><strong>Phone:</strong> ${data.phone_number}</p>
+                        ${data.image_path ? `<img src="/${data.image_path}" style="max-width: 100%; height: auto;" />` : ""}
+                    `;
+                    document.getElementById("detailsModal").style.display = "block";
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function viewStatement(statementId) {
+            fetch(`/statement_details/${statementId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Statement not found');
+                    return response.json();
+                })
+                .then(data => {
+                    const matchStatus = data.match_verified ? 
+                        `<span style="color: #28a745;">Match Confirmed${data.match_confidence ? ' (Distance: ' + data.match_confidence.toFixed(2) + ')' : ''}</span>` : 
+                        `<span style="color: #dc3545;">No Match${data.match_confidence !== null ? ' (Distance: ' + data.match_confidence.toFixed(2) + ')' : ''}</span>`;
+                    
+                    document.getElementById("statementDetails").innerHTML = `
+                        <p><strong>Statement ID:</strong> ${data.statement_id}</p>
+                        <p><strong>Reporter Name:</strong> ${data.reporter_full_name}</p>
+                        <p><strong>Phone Number:</strong> ${data.phone_number}</p>
+                        <p><strong>ID Number:</strong> ${data.id_number}</p>
+                        <p><strong>Other Details:</strong> ${data.other_details}</p>
+                        <p><strong>Related Report ID:</strong> ${data.related_report_id}</p>
+                        <p><strong>Missing Person:</strong> ${data.missing_person_name}</p>
+                        <p><strong>Submitted At:</strong> ${data.created_at}</p>
+                        <p><strong>Face Match:</strong> ${matchStatus}</p>
+                        ${data.image_path && data.image_path !== "No image available" ? `
+                            <p><strong>Image:</strong></p>
+                            <img src="/${data.image_path}" style="max-width: 100%; height: auto; margin-top: 10px;" alt="Statement Image">
+                        ` : '<p><strong>Image:</strong> No image available</p>'}
+                    `;
+                    document.getElementById("statementModal").style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById("statementDetails").innerHTML = `
+                        <p style="color: red;">Error loading statement: ${error.message} (ID: ${statementId})</p>
+                    `;
+                    document.getElementById("statementModal").style.display = "block";
+                });
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+    </script>
 </body>
 </html>
