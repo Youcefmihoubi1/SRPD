@@ -4,39 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Missing Person</title>
-    <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <style>
+        #results { margin-top: 20px; }
+        #results p { padding: 10px; background-color: #f9f9f9; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
+        #results img { max-width: 100px; height: auto; margin-top: 5px; }
+    </style>
 </head>
 <body>
     <header>
         <h1>Search for Missing Person</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="report.html">Report</a></li>
-                <li><a href="search.html">Search</a></li>
-                <li><a href="login.html">Login</a></li>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('report') }}">Report</a></li>
+                <li><a href="{{ url_for('search') }}">Search</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <form id="searchForm">
+        <form id="searchForm" method="POST" action="{{ url_for('search') }}">
             <h2>Search for Missing Person</h2>
-            <label for="searchName">Enter Full Name:</label>
-            <input type="text" id="searchName" name="searchName" placeholder="Enter Full Name" required><br>
-
+        
+            <label for="searchGender">Select Gender:</label>
+            <select id="searchGender" name="gender">
+                <option value="">All</option>
+                <option value="Male" {% if request.form.gender == "Male" %}selected{% endif %}>Male</option>
+                <option value="Female" {% if request.form.gender == "Female" %}selected{% endif %}>Female</option>
+            </select><br>
+        
+            <label for="searchState">Select State:</label>
+            <select id="searchState" name="state">
+                <option value="">All</option>
+                <!-- قائمة الولايات الكاملة من report.html -->
+                <option value="1" {% if request.form.state == "1" %}selected{% endif %}>Adrar</option>
+                <option value="2" {% if request.form.state == "2" %}selected{% endif %}>Chlef</option>
+                <option value="3" {% if request.form.state == "3" %}selected{% endif %}>Laghouat</option>
+                <option value="4" {% if request.form.state == "4" %}selected{% endif %}>Oum El Bouaghi</option>
+                <option value="5" {% if request.form.state == "5" %}selected{% endif %}>Batna</option>
+                <option value="6" {% if request.form.state == "6" %}selected{% endif %}>Bejaia</option>
+                <option value="7" {% if request.form.state == "7" %}selected{% endif %}>Biskra</option>
+                <option value="8" {% if request.form.state == "8" %}selected{% endif %}>Bechar</option>
+                <option value="9" {% if request.form.state == "9" %}selected{% endif %}>Blida</option>
+                <option value="10" {% if request.form.state == "10" %}selected{% endif %}>Bouira</option>
+                <option value="11" {% if request.form.state == "11" %}selected{% endif %}>Tamanrasset</option>
+                <option value="12" {% if request.form.state == "12" %}selected{% endif %}>Tebessa</option>
+                <option value="13" {% if request.form.state == "13" %}selected{% endif %}>Tlemcen</option>
+                <option value="14" {% if request.form.state == "14" %}selected{% endif %}>Tiaret</option>
+                <option value="15" {% if request.form.state == "15" %}selected{% endif %}>Tizi Ouzou</option>
+                <option value="16" {% if request.form.state == "16" %}selected{% endif %}>Algiers</option>
+                <option value="17" {% if request.form.state == "17" %}selected{% endif %}>Djelfa</option>
+                <option value="18" {% if request.form.state == "18" %}selected{% endif %}>Jijel</option>
+                <option value="19" {% if request.form.state == "19" %}selected{% endif %}>Setif</option>
+                <option value="20" {% if request.form.state == "20" %}selected{% endif %}>Saida</option>
+                <option value="21" {% if request.form.state == "21" %}selected{% endif %}>Skikda</option>
+                <option value="22" {% if request.form.state == "22" %}selected{% endif %}>Sidi Bel Abbes</option>
+                <option value="23" {% if request.form.state == "23" %}selected{% endif %}>Annaba</option>
+                <option value="24" {% if request.form.state == "24" %}selected{% endif %}>Guelma</option>
+                <option value="25" {% if request.form.state == "25" %}selected{% endif %}>Constantine</option>
+                <option value="26" {% if request.form.state == "26" %}selected{% endif %}>Medea</option>
+                <option value="27" {% if request.form.state == "27" %}selected{% endif %}>Mostaganem</option>
+                <option value="28" {% if request.form.state == "28" %}selected{% endif %}>M'Sila</option>
+                <option value="29" {% if request.form.state == "29" %}selected{% endif %}>Mascara</option>
+                <option value="30" {% if request.form.state == "30" %}selected{% endif %}>Ouargla</option>
+                <option value="31" {% if request.form.state == "31" %}selected{% endif %}>Oran</option>
+                <option value="32" {% if request.form.state == "32" %}selected{% endif %}>El Bayadh</option>
+                <option value="33" {% if request.form.state == "33" %}selected{% endif %}>Illizi</option>
+                <option value="34" {% if request.form.state == "34" %}selected{% endif %}>Bordj Bou Arreridj</option>
+                <option value="35" {% if request.form.state == "35" %}selected{% endif %}>Boumerdes</option>
+                <option value="36" {% if request.form.state == "36" %}selected{% endif %}>El Tarf</option>
+                <option value="37" {% if request.form.state == "37" %}selected{% endif %}>Tindouf</option>
+                <option value="38" {% if request.form.state == "38" %}selected{% endif %}>Tissemsilt</option>
+                <option value="39" {% if request.form.state == "39" %}selected{% endif %}>El Oued</option>
+                <option value="40" {% if request.form.state == "40" %}selected{% endif %}>Khenchela</option>
+                <option value="41" {% if request.form.state == "41" %}selected{% endif %}>Souk Ahras</option>
+                <option value="42" {% if request.form.state == "42" %}selected{% endif %}>Tipaza</option>
+                <option value="43" {% if request.form.state == "43" %}selected{% endif %}>Mila</option>
+                <option value="44" {% if request.form.state == "44" %}selected{% endif %}>Ain Defla</option>
+                <option value="45" {% if request.form.state == "45" %}selected{% endif %}>Naama</option>
+                <option value="46" {% if request.form.state == "46" %}selected{% endif %}>Ain Temouchent</option>
+                <option value="47" {% if request.form.state == "47" %}selected{% endif %}>Ghardaia</option>
+                <option value="48" {% if request.form.state == "48" %}selected{% endif %}>Relizane</option>
+                <option value="49" {% if request.form.state == "49" %}selected{% endif %}>Timimoun</option>
+                <option value="50" {% if request.form.state == "50" %}selected{% endif %}>Bordj Badji Mokhtar</option>
+                <option value="51" {% if request.form.state == "51" %}selected{% endif %}>Ouled Djellal</option>
+                <option value="52" {% if request.form.state == "52" %}selected{% endif %}>Beni Abbes</option>
+                <option value="53" {% if request.form.state == "53" %}selected{% endif %}>Ain Salah</option>
+                <option value="54" {% if request.form.state == "54" %}selected{% endif %}>Ain Guezzam</option>
+                <option value="55" {% if request.form.state == "55" %}selected{% endif %}>Touggourt</option>
+                <option value="56" {% if request.form.state == "56" %}selected{% endif %}>Djanet</option>
+                <option value="57" {% if request.form.state == "57" %}selected{% endif %}>El M'Ghair</option>
+                <option value="58" {% if request.form.state == "58" %}selected{% endif %}>El Menia</option>
+            </select><br>
+        
             <button type="submit">Search</button>
         </form>
-
+        
         <div id="results">
-            <!-- Search results will appear here -->
+            {% if results %}
+                {% for result in results %}
+                    <p>
+                        <strong>Name:</strong> {{ result[1] }} <br>
+                        <strong>Gender:</strong> {{ result[3] }} <br>
+                        <strong>Province:</strong> {{ result[5] }} <br>
+                        <strong>Missing Date:</strong> {{ result[4] }} <br>
+                        <strong>Blood Group:</strong> {{ result[6] }} <br>
+                        {% if result[11] %}
+                            <img src="/{{ result[11] }}" alt="Missing Person Image">
+                        {% endif %}
+                        <br>
+                        <!-- زر الإفادة الخاص بكل شخص -->
+                        <a href="{{ url_for('statement', report_id=result[0]) }}" style="display: inline-block; padding: 5px 10px; background-color: #003366; color: white; text-decoration: none; border-radius: 5px; margin-top: 5px;">Submit a Statement</a>
+                    </p>
+                {% endfor %}
+            {% else %}
+                <p>No results found.</p>
+            {% endif %}
         </div>
     </main>
-
     <footer>
-        <p>&copy; 2025 All Rights Reserved | SDG Dev Team</p>
+        <center><p>© 2025 All Rights Reserved | Mihoubi Youcef</p></center>
     </footer>
-
-    <script src="scripts/script.js"></script>
 </body>
 </html>
