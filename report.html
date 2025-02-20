@@ -1,83 +1,359 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>SRPD</title>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="/styles/style.css" >
-    </head>
-    <body>
-        <header>
-            <center><h1>Online Platform For Search And Report Missing People</h1></center>
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="report.html">Report</a></li>
-                    <li><a href="search.html">Search</a></li>
-                    <li><a href="login.html">Login</a></li>
-                </ul>
-            </nav>
-        </header>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRPD - Report Missing Person</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            display: none;
+        }
+        input.invalid {
+            border: 2px solid red;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+        .modal-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Online Platform For Search And Report Missing People</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('report') }}">Report</a></li>
+                <li><a href="{{ url_for('search') }}">Search</a></li>
+            </ul>
+        </nav>
+    </header>
 
-        <main>
-            <center><h2>Report About Missing Person</h2></center>
-            <form action="submit-report.html" method="POST" enctype="multipart/form-data">
+    <main>
+        <h2>Report Missing Person</h2>
+        <form id="reportForm" action="{{ url_for('report') }}" method="POST" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Missing Person Details</legend>
 
-                <label for="fullName">
-                    Full Name of Missing Person<br>
-                    <input type="text" id="fullName" name="fullName" placeholder="Enter Full Name" required><br>
-                </label>
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" required />
 
-                <label for="birthdate">
-                    Birthdate<br>
-                    <input type="date" id="birthdate" name="birthdate" required><br>
-                </label>
+                <label for="birthdate">Birthdate:</label>
+                <input type="date" id="birthdate" name="birthdate" required />
 
-                <label>Gender<br>
-                    <input type="radio" id="male" name="gender" value="Male" required> Male
-                    <input type="radio" id="female" name="gender" value="Female" required> Female<br>
-                </label>
+                <label>Gender:</label>
+                <input type="radio" id="male" name="gender" value="Male" required />
+                <label for="male">Male</label>
+                <input type="radio" id="female" name="gender" value="Female" required />
+                <label for="female">Female</label>
 
-                <label for="missingDate">
-                    Missing Date<br>
-                    <input type="date" id="missingDate" name="missingDate" required><br>
-                </label>
+                <label for="missingDate">Missing Date:</label>
+                <input type="date" id="missingDate" name="missingDate" required />
 
-                <label for="bloodGroup">
-                    Blood Group<br>
-                    <input type="text" id="bloodGroup" name="bloodGroup" placeholder="Enter Blood Group" required><br>
-                </label>
+                <label for="wilaya">Province</label>
+                <select id="wilaya" name="wilaya" required>
+                    <option value="">-- Choose Province --</option>
+                    <option value="1">Adrar</option>
+                    <option value="2">Chlef</option>
+                    <option value="3">Laghouat</option>
+                    <option value="4">Oum El Bouaghi</option>
+                    <option value="5">Batna</option>
+                    <option value="6">Bejaia</option>
+                    <option value="7">Biskra</option>
+                    <option value="8">Bechar</option>
+                    <option value="9">Blida</option>
+                    <option value="10">Bouira</option>
+                    <option value="11">Tamanrasset</option>
+                    <option value="12">Tebessa</option>
+                    <option value="13">Tlemcen</option>
+                    <option value="14">Tiaret</option>
+                    <option value="15">Tizi Ouzou</option>
+                    <option value="16">Algiers</option>
+                    <option value="17">Djelfa</option>
+                    <option value="18">Jijel</option>
+                    <option value="19">Setif</option>
+                    <option value="20">Saida</option>
+                    <option value="21">Skikda</option>
+                    <option value="22">Sidi Bel Abbes</option>
+                    <option value="23">Annaba</option>
+                    <option value="24">Guelma</option>
+                    <option value="25">Constantine</option>
+                    <option value="26">Medea</option>
+                    <option value="27">Mostaganem</option>
+                    <option value="28">M'Sila</option>
+                    <option value="29">Mascara</option>
+                    <option value="30">Ouargla</option>
+                    <option value="31">Oran</option>
+                    <option value="32">El Bayadh</option>
+                    <option value="33">Illizi</option>
+                    <option value="34">Bordj Bou Arreridj</option>
+                    <option value="35">Boumerdes</option>
+                    <option value="36">El Tarf</option>
+                    <option value="37">Tindouf</option>
+                    <option value="38">Tissemsilt</option>
+                    <option value="39">El Oued</option>
+                    <option value="40">Khenchela</option>
+                    <option value="41">Souk Ahras</option>
+                    <option value="42">Tipaza</option>
+                    <option value="43">Mila</option>
+                    <option value="44">Ain Defla</option>
+                    <option value="45">Naama</option>
+                    <option value="46">Ain Temouchent</option>
+                    <option value="47">Ghardaia</option>
+                    <option value="48">Relizane</option>
+                    <option value="49">Timimoun</option>
+                    <option value="50">Bordj Badji Mokhtar</option>
+                    <option value="51">Ouled Djellal</option>
+                    <option value="52">Beni Abbes</option>
+                    <option value="53">Ain Salah</option>
+                    <option value="54">Ain Guezzam</option>
+                    <option value="55">Touggourt</option>
+                    <option value="56">Djanet</option>
+                    <option value="57">El M'Ghair</option>
+                    <option value="58">El Menia</option>
+                </select>
 
-                <label for="image">
-                    Image of Missing Person<br>
-                    <input type="file" id="image" name="image" accept="image/*" required><br>
-                </label>
+                <label for="bloodGroup">Blood Group:</label>
+                <select id="bloodGroup" name="bloodGroup" required>
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                </select>
 
-                <label for="otherDetails">
-                    Other Details<br>
-                    <textarea id="otherDetails" name="otherDetails" placeholder="Provide additional details" rows="4" cols="50"></textarea><br>
-                </label>
+                <label for="image">Upload Image:</label>
+                <input type="file" id="image" name="image" accept="image/*" />
 
-                <label for="reporterFullName">
-                    Full Name of Reporter<br>
-                    <input type="text" id="reporterFullName" name="reporterFullName" placeholder="Enter Your Full Name" required><br>
-                </label>
+                <label for="otherDetails">Other Details:</label>
+                <textarea id="otherDetails" name="otherDetails" rows="4"></textarea>
+            </fieldset>
 
-                <label for="phoneNumber">
-                    Phone Number<br>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter Your Phone Number" required><br>
-                </label>
+            <fieldset>
+                <legend>Reporter Information</legend>
 
-                <label for="idNumber">
-                    ID Number (Optional)<br>
-                    <input type="text" id="idNumber" name="idNumber" placeholder="Enter Your ID Number"><br>
-                </label>
+                <label for="reporterFullName">Full Name:</label>
+                <input type="text" id="reporterFullName" name="reporterFullName" required />
 
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" required />
+                <span class="error-message" id="phoneError">Invalid phone number (e.g., 0612345678)</span>
+
+                <label for="idNumber">ID Number:</label>
+                <input type="text" id="idNumber" name="idNumber" required />
+                <span class="error-message" id="idError">Invalid ID number (18 digits)</span>
+            </fieldset>
+
+            <center>
                 <button type="submit">Submit Report</button>
-            </form>
-        </main>
+                <button type="button" id="download-pdf">Download PDF</button>
+            </center>
+        </form>
 
-        <footer>
-            <center>All Rights Reserved By SDG Dev Team.</center>
-        </footer>
-    </body>
+        <!-- Modal لعرض التأكيد -->
+        <div id="confirmationModal" class="modal">
+            <div class="modal-content">
+                <h3>Confirm Your Report</h3>
+                <div id="modalDetails"></div>
+                <div class="modal-buttons">
+                    <button id="confirmSubmit">Confirm & Submit</button>
+                    <button id="confirmPDF">Confirm & Download PDF</button>
+                    <button id="cancelModal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 All Rights Reserved | Mihoubi Youcef</p>
+    </footer>
+
+    <script>
+        function validateForm() {
+            const phoneInput = document.getElementById("phoneNumber");
+            const idInput = document.getElementById("idNumber");
+            const fullName = document.getElementById("fullName").value.trim();
+            const birthdate = document.getElementById("birthdate").value;
+            const missingDate = document.getElementById("missingDate").value;
+            const wilaya = document.getElementById("wilaya").value;
+            const bloodGroup = document.getElementById("bloodGroup").value;
+            const reporterFullName = document.getElementById("reporterFullName").value.trim();
+
+            const phonePattern = /^(05|06|07)[0-9]{8}$/;
+            const idPattern = /^[0-9]{18}$/;
+            const today = new Date();
+            const birthDateObj = new Date(birthdate);
+            const missingDateObj = new Date(missingDate);
+
+            let isValid = true;
+
+            if (!fullName || !birthdate || !missingDate || !wilaya || !bloodGroup || !reporterFullName) {
+                alert("❌ Please fill all required fields.");
+                return false;
+            }
+
+            if (!phonePattern.test(phoneInput.value)) {
+                phoneInput.classList.add("invalid");
+                document.getElementById("phoneError").style.display = "block";
+                isValid = false;
+            } else {
+                phoneInput.classList.remove("invalid");
+                document.getElementById("phoneError").style.display = "none";
+            }
+
+            if (!idPattern.test(idInput.value)) {
+                idInput.classList.add("invalid");
+                document.getElementById("idError").style.display = "block";
+                isValid = false;
+            } else {
+                idInput.classList.remove("invalid");
+                document.getElementById("idError").style.display = "none";
+            }
+
+            if (birthDateObj > today) {
+                alert("❌ Birthdate cannot be in the future!");
+                isValid = false;
+            } else if (today.getFullYear() - birthDateObj.getFullYear() > 120) {
+                alert("❌ Birthdate is too old (over 120 years)!");
+                isValid = false;
+            }
+
+            if (missingDateObj > today) {
+                alert("❌ Missing date cannot be in the future!");
+                isValid = false;
+            } else if (missingDateObj < birthDateObj) {
+                alert("❌ Missing date cannot be before birthdate!");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function showConfirmationModal(action) {
+            if (!validateForm()) return;
+
+            const formData = {
+                fullName: document.getElementById("fullName").value.trim(),
+                birthdate: document.getElementById("birthdate").value,
+                gender: document.querySelector('input[name="gender"]:checked').value,
+                missingDate: document.getElementById("missingDate").value,
+                wilaya: document.getElementById("wilaya").options[document.getElementById("wilaya").selectedIndex].text,
+                bloodGroup: document.getElementById("bloodGroup").value,
+                otherDetails: document.getElementById("otherDetails").value.trim(),
+                reporterFullName: document.getElementById("reporterFullName").value.trim(),
+                phoneNumber: document.getElementById("phoneNumber").value,
+                idNumber: document.getElementById("idNumber").value
+            };
+
+            const modalDetails = document.getElementById("modalDetails");
+            modalDetails.innerHTML = `
+                <p><strong>Full Name:</strong> ${formData.fullName}</p>
+                <p><strong>Birthdate:</strong> ${formData.birthdate}</p>
+                <p><strong>Gender:</strong> ${formData.gender}</p>
+                <p><strong>Missing Date:</strong> ${formData.missingDate}</p>
+                <p><strong>Province:</strong> ${formData.wilaya}</p>
+                <p><strong>Blood Group:</strong> ${formData.bloodGroup}</p>
+                <p><strong>Other Details:</strong> ${formData.otherDetails || "N/A"}</p>
+                <p><strong>Reporter Name:</strong> ${formData.reporterFullName}</p>
+                <p><strong>Phone Number:</strong> ${formData.phoneNumber}</p>
+                <p><strong>ID Number:</strong> ${formData.idNumber}</p>
+            `;
+
+            const modal = document.getElementById("confirmationModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmSubmit").onclick = () => {
+                modal.style.display = "none";
+                document.getElementById("reportForm").submit();
+            };
+            document.getElementById("confirmPDF").onclick = () => {
+                modal.style.display = "none";
+                generatePDF(formData);
+            };
+            document.getElementById("cancelModal").onclick = () => {
+                modal.style.display = "none";
+            };
+        }
+
+        function generatePDF(formData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text("Missing Person Report", 70, 15);
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+
+            let y = 30;
+            doc.text(`Full Name: ${formData.fullName}`, 15, y);
+            doc.text(`Birthdate: ${formData.birthdate}`, 15, (y += 10));
+            doc.text(`Gender: ${formData.gender}`, 15, (y += 10));
+            doc.text(`Missing Date: ${formData.missingDate}`, 15, (y += 10));
+            doc.text(`Province: ${formData.wilaya}`, 15, (y += 10));
+            doc.text(`Blood Group: ${formData.bloodGroup}`, 15, (y += 10));
+            doc.text(`Other Details:`, 15, (y += 10));
+            doc.setFont("helvetica", "italic");
+            doc.text(doc.splitTextToSize(formData.otherDetails || "N/A", 120), 15, (y += 7));
+            doc.setFont("helvetica", "normal");
+
+            const imageInput = document.getElementById("image");
+            if (imageInput.files.length > 0) {
+                const file = imageInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function () {
+                        doc.addImage(img.src, "JPEG", 140, 30, 60, 80);
+                        doc.save("Missing_Report.pdf");
+                    };
+                };
+                reader.onerror = () => alert("❌ Failed to load image.");
+                reader.readAsDataURL(file);
+            } else {
+                doc.save("Missing_Report.pdf");
+            }
+        }
+
+        document.getElementById("reportForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            showConfirmationModal("submit");
+        });
+
+        document.getElementById("download-pdf").addEventListener("click", function () {
+            showConfirmationModal("pdf");
+        });
+    </script>
+</body>
 </html>
