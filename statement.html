@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRPD - Submit Statement</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            display: none;
+        }
+        input.invalid {
+            border: 2px solid red;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Online Platform For Search And Report Missing People</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('report') }}">Report</a></li>
+                <li><a href="{{ url_for('search') }}">Search</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Submit Statement for Missing Person: {{ missing_person_name }}</h2>
+        <form id="statementForm" action="{{ url_for('statement', report_id=report_id) }}" method="POST" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Reporter Information</legend>
+
+                <label for="reporterFullName">Full Name:</label>
+                <input type="text" id="reporterFullName" name="reporterFullName" required />
+
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" required />
+                <span class="error-message" id="phoneError">Invalid phone number (e.g., 0612345678)</span>
+
+                <label for="idNumber">ID Number:</label>
+                <input type="text" id="idNumber" name="idNumber" required />
+                <span class="error-message" id="idError">Invalid ID number (18 digits)</span>
+            </fieldset>
+
+            <fieldset>
+                <legend>Statement Details</legend>
+
+                <label for="image">Upload Image (Optional):</label>
+                <input type="file" id="image" name="image" accept="image/*" />
+
+                <label for="otherDetails">Additional Details:</label>
+                <textarea id="otherDetails" name="otherDetails" rows="4"></textarea>
+            </fieldset>
+
+            <center>
+                <button type="submit">Submit Statement</button>
+            </center>
+        </form>
+    </main>
+
+    <footer>
+        <p>© 2025 All Rights Reserved | Mihoubi Youcef</p>
+    </footer>
+
+    <script>
+        document.getElementById("statementForm").addEventListener("submit", function (event) {
+            const phoneInput = document.getElementById("phoneNumber");
+            const idInput = document.getElementById("idNumber");
+            const reporterFullName = document.getElementById("reporterFullName").value.trim();
+
+            const phonePattern = /^(05|06|07)[0-9]{8}$/;
+            const idPattern = /^[0-9]{18}$/;
+
+            let isValid = true;
+
+            if (!reporterFullName) {
+                alert("❌ Please fill all required fields.");
+                event.preventDefault();
+                return;
+            }
+
+            if (!phonePattern.test(phoneInput.value)) {
+                phoneInput.classList.add("invalid");
+                document.getElementById("phoneError").style.display = "block";
+                isValid = false;
+            } else {
+                phoneInput.classList.remove("invalid");
+                document.getElementById("phoneError").style.display = "none";
+            }
+
+            if (!idPattern.test(idInput.value)) {
+                idInput.classList.add("invalid");
+                document.getElementById("idError").style.display = "block";
+                isValid = false;
+            } else {
+                idInput.classList.remove("invalid");
+                document.getElementById("idError").style.display = "none";
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
